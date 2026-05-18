@@ -1,0 +1,370 @@
+<%- include('partials/head', { title: 'Your Results' }) %>
+<%- include('partials/nav') %>
+
+<%
+  var barColors = { R:'#4a90d9', I:'#7c5cbf', A:'#e8674a', S:'#27ae60', E:'#e8c547', C:'#95a5a6' };
+  var fundClass = {
+    'Fully Funded' : 'badge-full',
+    'Partial'      : 'badge-partial',
+    'High Funding' : 'badge-high',
+    'Varies'       : 'badge-varies',
+    'Partial/Full' : 'badge-partial'
+  };
+  var streamLabels = {
+    science_pcm     : 'Science — PCM',
+    science_pcb     : 'Science — PCB',
+    commerce        : 'Commerce',
+    arts_humanities : 'Arts / Humanities'
+  };
+  var maxScore = (sorted && sorted.length > 0) ? (sorted[0][1] || 1) : 1;
+%>
+
+<main>
+  <div class="container results-page">
+
+    <%# ── HERO ── %>
+    <div class="r-hero">
+      <div class="r-hero-content">
+        <p class="r-hero-label">Your RIASEC profile</p>
+        <h1><%= riasecNames[top1] %> + <%= riasecNames[top2] %></h1>
+        <p class="r-hero-sub">
+          Psychometric analysis for <%= user.first_name %> <%= user.last_name %>
+          <% if (edu_level === '12th' && stream) { %>
+            &nbsp;·&nbsp;<strong style="color:var(--accent)"><%= streamLabels[stream] || stream %></strong>
+          <% } %>
+        </p>
+        <div class="type-badges">
+          <span class="tbadge primary"><%= riasecNames[top1] %></span>
+          <span class="tbadge secondary"><%= riasecNames[top2] %></span>
+          <% for (var ti = 2; ti < sorted.length; ti++) { %>
+            <span class="tbadge ghost"><%= riasecNames[sorted[ti][0]] || sorted[ti][0] %></span>
+          <% } %>
+        </div>
+      </div>
+    </div>
+
+    <%# ── RIASEC CHART ── %>
+    <div class="result-card">
+      <h2 class="result-card-title">RIASEC score breakdown</h2>
+      <% for (var bi = 0; bi < sorted.length; bi++) { %>
+        <%
+          var bk = sorted[bi][0];
+          var bv = sorted[bi][1];
+          var bw = maxScore > 0 ? Math.round((bv / maxScore) * 100) : 0;
+        %>
+        <div class="bar-row">
+          <span class="bar-lbl"><%= riasecNames[bk] || bk %></span>
+          <div class="bar-track">
+            <div class="bar-fill" style="width:<%= bw %>%;background:<%= barColors[bk] || '#888' %>"></div>
+          </div>
+          <span class="bar-val"><%= Math.round(bv) %></span>
+        </div>
+      <% } %>
+    </div>
+
+    <%# ══════════════════════════════════════
+        AFTER-12th CAREER PATHS
+    ═══════════════════════════════════════ %>
+    <% if (edu_level === '12th' && after12th) { %>
+
+      <% if (after12thRecommended && after12thRecommended.length > 0) { %>
+        <div class="result-section">
+          <h2 class="r-sec-title">Top career picks for your profile</h2>
+          <p class="r-sec-note">
+            Based on your <strong><%= riasecNames[top1] %></strong> +
+            <strong><%= riasecNames[top2] %></strong> personality and
+            <strong><%= streamLabels[stream] || stream %></strong> stream.
+            <em>Click any card for full details.</em>
+          </p>
+          <div class="career-grid career-grid-wide">
+            <% for (var ai = 0; ai < after12thRecommended.length; ai++) { %>
+              <% var ac = after12thRecommended[ai]; %>
+              <div class="career-chip-full career-chip-clickable"
+                   data-career="<%= ac.title %>"
+                   onclick="openCareerModal(this.dataset.career)"
+                   tabindex="0" role="button">
+                <div class="ccf-top">
+                  <span class="ccf-emoji"><%= ac.emoji %></span>
+                  <div>
+                    <div class="ccf-title"><%= ac.title %></div>
+                    <% if (ac.exam) { %>
+                      <div class="ccf-meta">
+                        <span class="ccf-badge exam-badge">Exam: <%= ac.exam %></span>
+                        <span class="ccf-badge dur-badge"><%= ac.duration %></span>
+                      </div>
+                    <% } %>
+                  </div>
+                </div>
+                <% if (ac.scope) { %><div class="ccf-scope"><%= ac.scope %></div><% } %>
+                <div class="career-chip-hint">Click to learn more →</div>
+              </div>
+            <% } %>
+          </div>
+        </div>
+      <% } %>
+
+      <%# Full career directory by section %>
+      <div class="result-section">
+        <h2 class="r-sec-title">Complete career directory — <%= streamLabels[stream] || stream %></h2>
+        <% var secKeys = Object.keys(after12th); %>
+        <% for (var ski = 0; ski < secKeys.length; ski++) { %>
+          <% var secKey = secKeys[ski]; %>
+          <% var courses = after12th[secKey]; %>
+          <% if (secKey === 'vocational') { continue; } %>
+          <div class="career-section-block">
+            <div class="cs-header">
+              <span class="cs-title"><%= sectionTitles[secKey] || secKey.replace(/_/g,' ') %></span>
+              <span class="cs-count"><%= courses.length %> options</span>
+            </div>
+            <div class="cs-table-wrap">
+              <table class="cs-table">
+                <thead>
+                  <tr>
+                    <th>Course / Degree</th>
+                    <% if (courses[0] && courses[0].exam !== undefined) { %><th>Entrance Exam</th><% } %>
+                    <% if (courses[0] && courses[0].duration !== undefined) { %><th>Duration</th><% } %>
+                    <th>Career Scope</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% for (var ci2 = 0; ci2 < courses.length; ci2++) { %>
+                    <% var course = courses[ci2]; %>
+                    <tr>
+                      <td>
+                        <span class="cs-emoji"><%= course.emoji %></span>
+                        <strong><%= course.title %></strong>
+                      </td>
+                      <% if (course.exam !== undefined) { %>
+                        <td><span class="exam-pill"><%= course.exam %></span></td>
+                      <% } %>
+                      <% if (course.duration !== undefined) { %>
+                        <td class="dur-cell"><%= course.duration %></td>
+                      <% } %>
+                      <td class="scope-cell"><%= course.scope %></td>
+                    </tr>
+                  <% } %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        <% } %>
+      </div>
+
+      <% if (after12th.vocational && after12th.vocational.length > 0) { %>
+        <div class="result-section">
+          <h2 class="r-sec-title">🛠️ Vocational, Diploma &amp; Short-term Courses</h2>
+          <div class="career-grid career-grid-wide">
+            <% for (var vi = 0; vi < after12th.vocational.length; vi++) { %>
+              <% var vc = after12th.vocational[vi]; %>
+              <div class="career-chip-full">
+                <div class="ccf-top">
+                  <span class="ccf-emoji"><%= vc.emoji %></span>
+                  <div>
+                    <div class="ccf-title"><%= vc.title %></div>
+                    <div class="ccf-meta"><span class="ccf-badge dur-badge"><%= vc.duration %></span></div>
+                  </div>
+                </div>
+                <div class="ccf-scope"><%= vc.scope %></div>
+              </div>
+            <% } %>
+          </div>
+        </div>
+      <% } %>
+
+    <% } else { %>
+
+      <%# ── General career chips ── %>
+      <div class="result-section">
+        <h2 class="r-sec-title">Recommended career paths</h2>
+        <p class="r-sec-note"><em>Click any career card to see subjects, universities, salary and more.</em></p>
+        <div class="career-grid">
+          <% for (var ci = 0; ci < careers.length; ci++) { %>
+            <% var cc = careers[ci]; %>
+            <div class="career-chip career-chip-clickable"
+                 data-career="<%= cc.title %>"
+                 onclick="openCareerModal(this.dataset.career)"
+                 tabindex="0" role="button">
+              <span class="c-emoji"><%= cc.emoji %></span>
+              <span><%= cc.title %></span>
+              <span class="career-chip-hint">Tap for details</span>
+            </div>
+          <% } %>
+        </div>
+      </div>
+
+    <% } %>
+
+    <%# ── STUDY DESTINATIONS ── %>
+    <div class="result-section">
+      <h2 class="r-sec-title">Suggested study destinations</h2>
+      <div class="country-grid">
+        <% for (var coi = 0; coi < countries.length; coi++) { %>
+          <% var co = countries[coi]; %>
+          <div class="country-card">
+            <div class="co-flag"><%= co.flag %></div>
+            <h4><%= co.name %></h4>
+            <p><%= co.desc %></p>
+            <span class="why-badge"><%= co.why %></span>
+          </div>
+        <% } %>
+      </div>
+    </div>
+
+    <%# ── SCHOLARSHIPS ── %>
+    <div class="result-section">
+      <div class="result-card">
+        <h2 class="result-card-title">Matched scholarships</h2>
+        <% if (!scholarships || !scholarships.length) { %>
+          <p class="no-results">No scholarships found for your selections. Try broadening your destination.</p>
+        <% } else { %>
+          <div class="table-wrap">
+            <table class="sch-table">
+              <thead>
+                <tr>
+                  <th>Scholarship</th>
+                  <th>Country</th>
+                  <th>Level</th>
+                  <th>Funding</th>
+                  <th>Link</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% for (var shi = 0; shi < scholarships.length; shi++) { %>
+                  <% var sch = scholarships[shi]; %>
+                  <% var fc  = fundClass[sch.amount] || 'badge-varies'; %>
+                  <tr>
+                    <td>
+                      <strong><%= sch.name %></strong>
+                      <p class="sch-desc"><%= sch.description %></p>
+                    </td>
+                    <td class="muted"><%= sch.country %></td>
+                    <td class="muted"><%= sch.level %></td>
+                    <td><span class="badge <%= fc %>"><%= sch.amount %></span></td>
+                    <td>
+                      <% if (sch.link) { %>
+                        <a href="<%= sch.link %>" target="_blank" rel="noopener noreferrer" class="sch-link-btn">
+                          Official site ↗
+                        </a>
+                      <% } else { %>
+                        <span class="muted" style="font-size:12px">—</span>
+                      <% } %>
+                    </td>
+                  </tr>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+        <% } %>
+      </div>
+    </div>
+
+    <div class="result-actions">
+      <a href="/assess" class="btn btn-ghost">Retake assessment</a>
+      <a href="/"       class="btn btn-ghost">Back to home</a>
+    </div>
+
+  </div>
+</main>
+
+<%# ═══════════════════════════════════════════════════════════
+    CAREER DETAIL MODAL
+    Placed at END of body, OUTSIDE <main>.
+    Inline style="display:none" ensures it is ALWAYS hidden
+    until openCareerModal() is called — regardless of CSS load.
+════════════════════════════════════════════════════════════ %>
+<div class="modal-overlay"
+     id="careerModal"
+     style="display:none"
+     onclick="handleModalClick(event)">
+  <div class="modal-box">
+
+    <button class="modal-close" onclick="closeCareerModal()" aria-label="Close">&#x2715;</button>
+
+    <div  class="modal-emoji"  id="modalEmoji"></div>
+    <h2   class="modal-title"  id="modalTitle"></h2>
+    <p    class="modal-about"  id="modalAbout"></p>
+
+    <div class="modal-grid">
+      <div class="modal-section">
+        <h4 class="modal-section-title">📚 Core subjects</h4>
+        <ul class="modal-list" id="modalSubjects"></ul>
+      </div>
+      <div class="modal-section">
+        <h4 class="modal-section-title">🛠️ Key skills needed</h4>
+        <ul class="modal-list" id="modalSkills"></ul>
+      </div>
+    </div>
+
+    <div class="modal-section">
+      <h4 class="modal-section-title">🏛️ Top universities worldwide</h4>
+      <div class="modal-uni-list" id="modalUnis"></div>
+    </div>
+
+    <div class="modal-salary">
+      <div class="modal-salary-item">
+        <span class="salary-flag">🇮🇳</span>
+        <div>
+          <div class="salary-label">India</div>
+          <div class="salary-val" id="modalSalaryIndia"></div>
+        </div>
+      </div>
+      <div class="modal-salary-item">
+        <span class="salary-flag">🌍</span>
+        <div>
+          <div class="salary-label">Abroad</div>
+          <div class="salary-val" id="modalSalaryAbroad"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<%# Career data injected by server — no require() needed in EJS %>
+<script>
+  var CAREER_DATA = <%- JSON.stringify(careerDetails || {}) %>;
+
+  function openCareerModal(title) {
+    var d = CAREER_DATA[title];
+    if (!d) {
+      d = {
+        emoji        : '🎯',
+        about        : title + ' is a rewarding career path with strong global demand.',
+        subjects     : ['Core discipline courses', 'Research methods', 'Practical lab projects'],
+        skills       : ['Domain expertise', 'Communication', 'Analytical thinking'],
+        universities : ['Top universities worldwide offer this program — check rankings for your region.'],
+        salary       : { india: 'Varies by role & experience', abroad: 'Varies by country & specialisation' }
+      };
+    }
+
+    document.getElementById('modalEmoji').textContent        = d.emoji || '🎯';
+    document.getElementById('modalTitle').textContent        = title;
+    document.getElementById('modalAbout').textContent        = d.about || '';
+    document.getElementById('modalSubjects').innerHTML       = (d.subjects     || []).map(function(s){ return '<li>' + s + '</li>'; }).join('');
+    document.getElementById('modalSkills').innerHTML         = (d.skills       || []).map(function(s){ return '<li>' + s + '</li>'; }).join('');
+    document.getElementById('modalUnis').innerHTML           = (d.universities || []).map(function(u){ return '<span class="modal-uni-pill">' + u + '</span>'; }).join('');
+    document.getElementById('modalSalaryIndia').textContent  = (d.salary && d.salary.india)  ? d.salary.india  : '—';
+    document.getElementById('modalSalaryAbroad').textContent = (d.salary && d.salary.abroad) ? d.salary.abroad : '—';
+
+    /* Show the modal */
+    var modal = document.getElementById('careerModal');
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeCareerModal() {
+    var modal = document.getElementById('careerModal');
+    modal.style.display = 'none';
+    document.body.style.overflow = '';
+  }
+
+  function handleModalClick(e) {
+    if (e.target.id === 'careerModal') closeCareerModal();
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeCareerModal();
+  });
+</script>
+
+<%- include('partials/foot') %>

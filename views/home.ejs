@@ -1,0 +1,99 @@
+<%- include('partials/head', { title: 'Home' }) %>
+<%- include('partials/nav') %>
+
+<main>
+  <%- include('partials/flash') %>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="container hero-inner">
+      <div class="hero-badge">RIASEC-based psychometric system</div>
+      <h1>Find your perfect<br><span class="accent">career path</span></h1>
+      <p class="hero-sub">Answer a short assessment about your interests and skills. Get personalised career recommendations, study-abroad destinations, and scholarships — all in one place.</p>
+      <div class="hero-cta">
+        <a href="/auth/register" class="btn btn-primary">Get started — it's free</a>
+        <a href="/auth/login" class="btn btn-ghost">I already have an account</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="features-section">
+    <div class="container">
+      <div class="features-grid">
+        <div class="feat-card">
+          <div class="feat-icon">🧠</div>
+          <h3>RIASEC assessment</h3>
+          <p>Psychometric model maps your personality to real career clusters used globally.</p>
+        </div>
+        <div class="feat-card">
+          <div class="feat-icon">🎯</div>
+          <h3>Career matching</h3>
+          <p>Rule-based engine recommends careers that best fit your unique profile.</p>
+        </div>
+        <div class="feat-card">
+          <div class="feat-icon">✈️</div>
+          <h3>Study abroad guide</h3>
+          <p>Country recommendations filtered by your budget and academic marks.</p>
+        </div>
+        <div class="feat-card">
+          <div class="feat-icon">🎓</div>
+          <h3>Scholarships</h3>
+          <p>Live-matched scholarships from our database of 30+ global opportunities.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <section class="stats-section">
+    <div class="container">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <span class="stat-num">30+</span>
+          <span class="stat-lbl">Scholarships</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-num">15</span>
+          <span class="stat-lbl">Countries</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-num">40+</span>
+          <span class="stat-lbl">Career paths</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-num">6</span>
+          <span class="stat-lbl">RIASEC types</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="how-section">
+    <div class="container">
+      <h2 class="section-title">How it works</h2>
+      <div class="steps-grid">
+        <div class="step">
+          <div class="step-num">1</div>
+          <h4>Create an account</h4>
+          <p>Register in seconds with your name and email address.</p>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <h4>Take the assessment</h4>
+          <p>Answer 11 questions about your interests, skills, and background.</p>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <h4>Get your results</h4>
+          <p>Receive personalised careers, countries, and scholarships instantly.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<%- include('partials/foot') %>

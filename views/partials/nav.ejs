@@ -1,0 +1,31 @@
+<nav class="navbar">
+  <div class="container nav-inner">
+
+    <a href="/" class="nav-brand">Career<span>Guide</span></a>
+
+    <div class="nav-links">
+      <a href="/scholarships" class="nav-btn outline nav-scholarships">🎓 Scholarships</a>
+
+      <% if (user) { %>
+        <span class="nav-user">Hi, <%= user.first_name %></span>
+        <a href="/assess"      class="nav-btn outline">Assessment</a>
+        <a href="/auth/logout" class="nav-btn outline">Log out</a>
+      <% } else { %>
+        <a href="/auth/login"    class="nav-btn outline">Log in</a>
+        <a href="/auth/register" class="nav-btn fill">Register</a>
+      <% } %>
+
+      <!-- Theme toggle -->
+      <button
+        class="theme-toggle"
+        id="themeToggle"
+        aria-label="Toggle dark / light mode"
+        title="Toggle theme"
+      >
+        <span class="theme-icon-light">☀️</span>
+        <span class="theme-icon-dark">🌙</span>
+      </button>
+    </div>
+
+  </div>
+</nav>

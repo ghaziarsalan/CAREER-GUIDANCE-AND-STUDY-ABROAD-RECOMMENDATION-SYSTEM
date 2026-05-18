@@ -1,0 +1,211 @@
+<%- include('partials/head', { title: 'Scholarships' }) %>
+<%- include('partials/nav') %>
+
+<%
+  const fundClass = {
+    'Fully Funded':'badge-full', 'Partial':'badge-partial',
+    'High Funding':'badge-high', 'Varies':'badge-varies', 'Partial/Full':'badge-partial'
+  };
+  const catIcon = { 'Government':'🏛️', 'University':'🎓', 'Private':'💼', 'NGO':'🌿' };
+  const countries = Object.keys(grouped);
+  const fullyFundedCount = Object.values(grouped).flat().filter(s => s.amount === 'Fully Funded').length;
+  const govCount = Object.values(grouped).flat().filter(s => s.category === 'Government').length;
+%>
+
+<main class="sp-main">
+
+  <!-- HERO -->
+  <div class="sp-hero">
+    <div class="sp-hero-inner">
+      <div class="sp-hero-left">
+        <span class="sp-eyebrow">Global Scholarship Directory</span>
+        <h1 class="sp-hero-title">Find funding for<br>your future</h1>
+        <p class="sp-hero-sub">
+          <%= total %> scholarships across <%= countries.length %> countries —
+          from fully funded government awards to university merit grants.
+        </p>
+        <div class="sp-filter-row">
+          <span class="sp-filter-label">Filter by funding:</span>
+          <div class="sp-filters" id="filterBtns">
+            <button class="sp-filter active" data-filter="all">All</button>
+            <button class="sp-filter" data-filter="Fully Funded">Fully Funded</button>
+            <button class="sp-filter" data-filter="Partial">Partial</button>
+            <button class="sp-filter" data-filter="High Funding">High Funding</button>
+            <button class="sp-filter" data-filter="Varies">Varies</button>
+          </div>
+        </div>
+      </div>
+      <div class="sp-hero-right">
+        <div class="sp-kpi-grid">
+          <div class="sp-kpi"><span class="sp-kpi-num"><%= total %></span><span class="sp-kpi-lbl">Scholarships</span></div>
+          <div class="sp-kpi"><span class="sp-kpi-num"><%= countries.length %></span><span class="sp-kpi-lbl">Countries</span></div>
+          <div class="sp-kpi sp-kpi-accent"><span class="sp-kpi-num"><%= fullyFundedCount %></span><span class="sp-kpi-lbl">Fully funded</span></div>
+          <div class="sp-kpi"><span class="sp-kpi-num"><%= govCount %></span><span class="sp-kpi-lbl">Government</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sp-body">
+    <div class="sp-layout">
+
+      <!-- SIDEBAR -->
+      <aside class="sp-sidebar">
+        <div class="sp-sidebar-inner">
+          <p class="sp-sidebar-heading">Countries</p>
+          <nav class="sp-country-nav">
+            <% countries.forEach(country => { %>
+              <a href="#c-<%= country.toLowerCase().replace(/\s+/g,'-') %>" class="sp-country-link" data-country="<%= country %>">
+                <span class="sp-cl-flag"><%= flags[country] || '🌍' %></span>
+                <span class="sp-cl-name"><%= country %></span>
+                <span class="sp-cl-count"><%= grouped[country].length %></span>
+              </a>
+            <% }) %>
+          </nav>
+          <div class="sp-legend">
+            <p class="sp-sidebar-heading" style="margin-top:24px">Funding type</p>
+            <div class="sp-legend-item"><span class="sp-legend-dot dot-full"></span>Fully Funded</div>
+            <div class="sp-legend-item"><span class="sp-legend-dot dot-high"></span>High Funding</div>
+            <div class="sp-legend-item"><span class="sp-legend-dot dot-partial"></span>Partial</div>
+            <div class="sp-legend-item"><span class="sp-legend-dot dot-varies"></span>Varies</div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- MAIN CONTENT -->
+      <div class="sp-content" id="schContent">
+        <% countries.forEach(country => { %>
+          <section class="sp-section" id="c-<%= country.toLowerCase().replace(/\s+/g,'-') %>">
+
+            <div class="sp-section-head">
+              <div class="sp-sh-left">
+                <span class="sp-sh-flag"><%= flags[country] || '🌍' %></span>
+                <div>
+                  <h2 class="sp-sh-country"><%= country %></h2>
+                  <span class="sp-sh-sub">
+                    <%= grouped[country].length %> scholarship<%= grouped[country].length !== 1 ? 's' : '' %>
+                    &nbsp;·&nbsp;
+                    <%= grouped[country].filter(s => s.amount === 'Fully Funded').length %> fully funded
+                  </span>
+                </div>
+              </div>
+              <a href="#sp-top" class="sp-back-top">↑ Top</a>
+            </div>
+
+            <div class="sp-cards">
+              <% grouped[country].forEach(s => { %>
+                <article class="sp-card" data-amount="<%= s.amount %>">
+                  <div class="sp-card-header">
+                    <div class="sp-card-badges">
+                      <span class="sp-fund-badge <%= fundClass[s.amount] || 'badge-varies' %>"><%= s.amount %></span>
+                      <span class="sp-cat-badge">
+                        <span style="font-size:13px"><%= catIcon[s.category] || '📌' %></span>
+                        <%= s.category %>
+                      </span>
+                    </div>
+                  </div>
+
+                  <h3 class="sp-card-name"><%= s.name %></h3>
+                  <p class="sp-card-desc"><%= s.description %></p>
+
+                  <div class="sp-card-footer">
+                    <div class="sp-card-meta">
+                      <span class="sp-meta-pill">
+                        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" style="flex-shrink:0"><rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M5 8h6M5 5h6M5 11h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                        <%= s.level %>
+                      </span>
+                    </div>
+
+                    <!-- Official link -->
+                    <% if (s.link) { %>
+                      <a
+                        href="<%= s.link %>"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="sp-official-link"
+                        onclick="event.stopPropagation()"
+                      >
+                        Official site ↗
+                      </a>
+                    <% } %>
+                  </div>
+                </article>
+              <% }) %>
+            </div>
+
+          </section>
+        <% }) %>
+
+        <div class="sp-no-results" id="noResults" style="display:none">
+          <div class="sp-no-results-inner">
+            <span style="font-size:40px">🔍</span>
+            <p>No scholarships match this filter.</p>
+            <button class="sp-filter-reset" onclick="resetFilter()">Show all scholarships</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CTA BANNER -->
+    <div class="sp-cta-banner">
+      <div class="sp-cta-inner">
+        <div>
+          <h3 class="sp-cta-title">Get scholarships matched to your profile</h3>
+          <p class="sp-cta-sub">Take our RIASEC assessment and receive scholarships filtered by your chosen country, education level, and career goals.</p>
+        </div>
+        <a href="<%= user ? '/assess' : '/auth/register' %>" class="btn btn-primary">
+          <%= user ? 'Take the assessment' : 'Get started free' %>
+        </a>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div id="sp-top"></div>
+
+<script>
+(function () {
+  var filterBtns  = document.querySelectorAll('.sp-filter');
+  var cards       = document.querySelectorAll('.sp-card');
+  var sections    = document.querySelectorAll('.sp-section');
+  var noResults   = document.getElementById('noResults');
+
+  function applyFilter(filter) {
+    filterBtns.forEach(function(b) { b.classList.toggle('active', b.dataset.filter === filter); });
+    var count = 0;
+    cards.forEach(function(card) {
+      var show = filter === 'all' || card.dataset.amount === filter;
+      card.style.display = show ? '' : 'none';
+      if (show) count++;
+    });
+    sections.forEach(function(sec) {
+      var visible = sec.querySelectorAll('.sp-card:not([style*="display: none"])').length;
+      sec.style.display = visible > 0 ? '' : 'none';
+    });
+    noResults.style.display = count === 0 ? 'flex' : 'none';
+  }
+
+  filterBtns.forEach(function(btn) {
+    btn.addEventListener('click', function() { applyFilter(btn.dataset.filter); });
+  });
+
+  var sectionEls = document.querySelectorAll('.sp-section');
+  var navLinks   = document.querySelectorAll('.sp-country-link');
+  function onScroll() {
+    var scrollY = window.scrollY + 120;
+    var active  = null;
+    sectionEls.forEach(function(sec) { if (sec.offsetTop <= scrollY) active = sec.id; });
+    navLinks.forEach(function(link) {
+      link.classList.toggle('active', link.getAttribute('href').replace('#','') === active);
+    });
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+})();
+
+function resetFilter() {
+  document.querySelector('.sp-filter[data-filter="all"]').click();
+}
+</script>
+
+<%- include('partials/foot') %>

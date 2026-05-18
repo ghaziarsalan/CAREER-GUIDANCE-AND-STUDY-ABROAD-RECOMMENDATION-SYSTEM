@@ -1,0 +1,295 @@
+<%- include('partials/head', { title: 'Assessment' }) %>
+<%- include('partials/nav') %>
+
+<main>
+  <div class="container assess-page">
+
+    <%- include('partials/flash') %>
+
+    <%# ── PAST RESULTS HISTORY ── %>
+    <% if (history && history.length > 0) { %>
+      <div class="history-section">
+        <div class="history-header">
+          <h2 class="history-title">📊 Your previous analyses</h2>
+          <span class="history-count"><%= history.length %> result<%= history.length > 1 ? 's' : '' %></span>
+        </div>
+        <div class="history-grid">
+
+          <% for (var hi = 0; hi < history.length; hi++) { %>
+            <% var h = history[hi]; %>
+            <div class="history-card" onclick="toggleHistory(this)" tabindex="0">
+
+              <div class="hc-summary">
+                <div class="hc-left">
+                  <div class="hc-types">
+                    <span class="hc-type-pill primary"><%= h.type1Name %></span>
+                    <span class="hc-type-pill secondary"><%= h.type2Name %></span>
+                  </div>
+                  <div class="hc-meta">
+                    <span class="hc-date">📅 <%= h.dateFormatted %></span>
+                    <% if (h.edu_level) { %>
+                      <span class="hc-edu">🎓 <%= h.edu_level %></span>
+                    <% } %>
+                    <% if (h.stream) { %>
+                      <%
+                        var streamShort = { science_pcm:'PCM', science_pcb:'PCB', commerce:'Commerce', arts_humanities:'Arts' };
+                      %>
+                      <span class="hc-stream"><%= streamShort[h.stream] || h.stream %></span>
+                    <% } %>
+                  </div>
+                </div>
+
+                <div class="hc-right">
+                  <div class="hc-careers">
+                    <%# topCareers is guaranteed array from routes/assess.js %>
+                    <% if (h.topCareers && h.topCareers.length > 0) { %>
+                      <% for (var ci = 0; ci < h.topCareers.length; ci++) { %>
+                        <span class="hc-career-pill"><%= h.topCareers[ci].emoji %> <%= h.topCareers[ci].title %></span>
+                      <% } %>
+                    <% } %>
+                  </div>
+                  <span class="hc-toggle-icon">▼</span>
+                </div>
+              </div>
+
+              <%# Expandable RIASEC mini-chart %>
+              <div class="hc-detail" style="display:none">
+                <div class="hc-bars">
+                  <%
+                    var hMaxVal = (h.sorted && h.sorted.length > 0) ? h.sorted[0][1] : 1;
+                    if (hMaxVal === 0) hMaxVal = 1;
+                    var hRNames  = { R:'Realistic', I:'Investigative', A:'Artistic', S:'Social', E:'Enterprising', C:'Conventional' };
+                    var hRColors = { R:'#4a90d9', I:'#7c5cbf', A:'#e8674a', S:'#27ae60', E:'#e8c547', C:'#95a5a6' };
+                  %>
+                  <% if (h.sorted && h.sorted.length > 0) { %>
+                    <% for (var bi = 0; bi < h.sorted.length; bi++) { %>
+                      <% var bk = h.sorted[bi][0]; var bv = h.sorted[bi][1]; %>
+                      <div class="hc-bar-row">
+                        <span class="hc-bar-lbl"><%= hRNames[bk] || bk %></span>
+                        <div class="hc-bar-track">
+                          <div class="hc-bar-fill"
+                               style="width:<%= Math.round((bv / hMaxVal) * 100) %>%;background:<%= hRColors[bk] || '#888' %>">
+                          </div>
+                        </div>
+                        <span class="hc-bar-val"><%= Math.round(bv) %></span>
+                      </div>
+                    <% } %>
+                  <% } %>
+                </div>
+                <div class="hc-detail-meta">
+                  <span>Budget: <strong><%= h.budget || '—' %></strong></span>
+                  <span>Destination: <strong><%= h.destination || '—' %></strong></span>
+                  <span>Marks: <strong><%= h.marks || '—' %></strong></span>
+                </div>
+              </div>
+
+            </div>
+          <% } %>
+
+        </div>
+      </div>
+    <% } %>
+
+    <%# ── PAGE HEADER ── %>
+    <div class="assess-header">
+      <h1>Your career assessment</h1>
+      <p>Answer all questions honestly for the most accurate recommendations.</p>
+    </div>
+
+    <%# ── PROGRESS BAR ── %>
+    <div class="progress-wrap">
+      <div class="progress-labels">
+        <span id="progText">0 of 11 answered</span>
+        <span id="progPct">0%</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progFill" style="width:0%"></div>
+      </div>
+    </div>
+
+    <form action="/assess/submit" method="POST" id="assessForm" novalidate>
+
+      <%# ── SECTION 1: Background ── %>
+      <div class="sec-card">
+        <div class="sec-head">
+          <div class="sec-num">1</div>
+          <div>
+            <div class="sec-title">Personal background</div>
+            <div class="sec-sub">Tell us about your academics and goals</div>
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="fg">
+            <label for="edu_level">Education level</label>
+            <select name="edu_level" id="edu_level" required onchange="handleEduChange(this.value)">
+              <option value="">Select level</option>
+              <option value="10th">After 10th</option>
+              <option value="12th">After 12th</option>
+              <option value="graduation">After graduation</option>
+              <option value="postgrad">Postgraduate</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label for="marks">Academic performance</label>
+            <select name="marks" id="marks" required>
+              <option value="">Select range</option>
+              <option value="high">Above 80%</option>
+              <option value="medium">60 – 80%</option>
+              <option value="low">Below 60%</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row-2" id="streamRow" style="display:none">
+          <div class="fg" style="grid-column: 1 / -1">
+            <label for="stream">Your 12th stream</label>
+            <select name="stream" id="stream">
+              <option value="">Select your stream</option>
+              <option value="science_pcm">Science — PCM (Physics, Chemistry, Maths)</option>
+              <option value="science_pcb">Science — PCB (Physics, Chemistry, Biology)</option>
+              <option value="commerce">Commerce</option>
+              <option value="arts_humanities">Arts / Humanities</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="fg">
+            <label for="budget">Study abroad budget (annual)</label>
+            <select name="budget" id="budget" required>
+              <option value="">Select budget</option>
+              <option value="low">Low — under ₹10L per year</option>
+              <option value="medium">Medium — ₹10L to ₹25L per year</option>
+              <option value="high">High — above ₹25L per year</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label for="destination">Preferred destination</label>
+            <select name="destination" id="destination" required>
+              <option value="">Select preference</option>
+              <option value="abroad">Study abroad</option>
+              <option value="india">Stay in India</option>
+              <option value="both">Open to both</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <%# ── SECTION 2: Interests ── %>
+      <div class="sec-card">
+        <div class="sec-head">
+          <div class="sec-num">2</div>
+          <div>
+            <div class="sec-title">Interests &amp; activities</div>
+            <div class="sec-sub">Rate 1 (strongly dislike) to 5 (strongly love)</div>
+          </div>
+        </div>
+
+        <%
+          var interestQs = [
+            'I enjoy building or fixing things with my hands (machines, electronics, tools)',
+            'I love solving complex problems using math, science, or logic',
+            'I enjoy creative activities like drawing, writing, music, or design',
+            'I like helping people, counselling, or working in healthcare / education',
+            'I enjoy leading projects, persuading people, or running a business',
+            'I prefer working with data, spreadsheets, records, and structured tasks'
+          ];
+        %>
+
+        <% for (var ii = 0; ii < interestQs.length; ii++) { %>
+          <div class="qblock">
+            <div class="qt"><%= interestQs[ii] %></div>
+            <div class="likert">
+              <span class="ll">Strongly dislike</span>
+              <div class="lopts">
+                <% for (var iv = 1; iv <= 5; iv++) { %>
+                  <label class="lb-label">
+                    <input type="radio" name="interest_<%= ii %>" value="<%= iv %>" required />
+                    <span class="lb"><%= iv %></span>
+                  </label>
+                <% } %>
+              </div>
+              <span class="ll r">Strongly love</span>
+            </div>
+          </div>
+        <% } %>
+      </div>
+
+      <%# ── SECTION 3: Skills ── %>
+      <div class="sec-card">
+        <div class="sec-head">
+          <div class="sec-num">3</div>
+          <div>
+            <div class="sec-title">Skills &amp; strengths</div>
+            <div class="sec-sub">How much does each statement describe you?</div>
+          </div>
+        </div>
+
+        <%
+          var skillQs = [
+            'I am good at math and analytical reasoning',
+            'I communicate well and can present ideas clearly',
+            'I am creative and come up with original ideas',
+            'I am organised, detail-oriented, and methodical',
+            'I pick up new technology and software quickly'
+          ];
+        %>
+
+        <% for (var si = 0; si < skillQs.length; si++) { %>
+          <div class="qblock">
+            <div class="qt"><%= skillQs[si] %></div>
+            <div class="likert">
+              <span class="ll">Strongly dislike</span>
+              <div class="lopts">
+                <% for (var sv = 1; sv <= 5; sv++) { %>
+                  <label class="lb-label">
+                    <input type="radio" name="skills_<%= sv <= 5 && si >= 0 ? 'skills_' + si : si %>"
+                           name="skills_<%= si %>"
+                           value="<%= sv %>" required />
+                    <span class="lb"><%= sv %></span>
+                  </label>
+                <% } %>
+              </div>
+              <span class="ll r">Strongly love</span>
+            </div>
+          </div>
+        <% } %>
+      </div>
+
+      <div class="submit-area">
+        <div class="sub-err" id="subErr">
+          Please answer all questions and fill in your background information.
+        </div>
+        <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
+          Analyse my profile
+        </button>
+      </div>
+
+    </form>
+  </div>
+</main>
+
+<script>
+  function handleEduChange(val) {
+    var row = document.getElementById('streamRow');
+    if (!row) return;
+    row.style.display = (val === '12th') ? 'grid' : 'none';
+    if (val !== '12th') {
+      var s = document.getElementById('stream');
+      if (s) s.value = '';
+    }
+  }
+
+  function toggleHistory(card) {
+    var detail = card.querySelector('.hc-detail');
+    var icon   = card.querySelector('.hc-toggle-icon');
+    if (!detail) return;
+    var isOpen = detail.style.display !== 'none';
+    detail.style.display = isOpen ? 'none' : 'block';
+    if (icon) icon.textContent = isOpen ? '▼' : '▲';
+    card.classList.toggle('hc-open', !isOpen);
+  }
+</script>
+
+<%- include('partials/foot') %>

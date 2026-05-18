@@ -1,0 +1,40 @@
+<%- include('partials/head', { title: 'Register' }) %>
+<%- include('partials/nav') %>
+
+<main>
+  <div class="auth-page">
+    <%- include('partials/flash') %>
+    <div class="auth-card">
+      <h2>Create your account</h2>
+      <p class="auth-sub">Start your career guidance journey. Takes less than 2 minutes.</p>
+
+      <form action="/auth/register" method="POST" id="registerForm" novalidate>
+        <div class="field-row">
+          <div class="field">
+            <label for="first_name">First name</label>
+            <input type="text" id="first_name" name="first_name" placeholder="Aarav" required>
+          </div>
+          <div class="field">
+            <label for="last_name">Last name</label>
+            <input type="text" id="last_name" name="last_name" placeholder="Shah" required>
+          </div>
+        </div>
+        <div class="field">
+          <label for="email">Email address</label>
+          <input type="email" id="email" name="email" placeholder="you@example.com" required>
+          <span class="field-err" id="emailErr">Please enter a valid email address.</span>
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" placeholder="At least 8 characters" required minlength="8">
+          <span class="field-err" id="pwdErr">Password must be at least 8 characters.</span>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full">Create account</button>
+      </form>
+
+      <p class="auth-switch">Already have an account? <a href="/auth/login">Log in</a></p>
+    </div>
+  </div>
+</main>
+
+<%- include('partials/foot') %>
