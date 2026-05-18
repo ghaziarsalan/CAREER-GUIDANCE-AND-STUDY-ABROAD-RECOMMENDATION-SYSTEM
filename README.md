@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # CareerGuide — AI-Based Career Guidance System
 
 A full-stack web application that helps students make informed career decisions using a **RIASEC psychometric model** and **rule-based intelligent system**.
@@ -146,3 +147,7 @@ Top 2 scores determine the career cluster and study destination.
 - OpenAI API integration for detailed explanations
 - PDF export of results
 - Email notifications
+=======
+# CAREER-GUIDANCE-AND-STUDY-ABROAD-RECOMMENDATION-SYSTEM
+A full-stack web application designed to help students choose the right career path and explore study abroad opportunities based on their interests, skills, academic background, and goals. The platform also provides scholarship information for both international studies and higher education opportunities in India.
+>>>>>>> e77489087f9f20b29b3128c09fe947474d3d0374
